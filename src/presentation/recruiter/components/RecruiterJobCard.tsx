@@ -3,11 +3,11 @@
 import Link from 'next/link';
 import { JobSummaryDTO } from '@/core/recruiter/application/dtos';
 
-interface JobCardProps {
+interface RecruiterJobCardProps {
   job: JobSummaryDTO;
 }
 
-export function JobCard({ job }: JobCardProps) {
+export function RecruiterJobCard({ job }: RecruiterJobCardProps) {
   const formattedDate = new Date(job.publishedAt).toLocaleDateString('en-US', {
     year: 'numeric',
     month: 'short',

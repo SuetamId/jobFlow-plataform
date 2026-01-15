@@ -113,10 +113,11 @@ export function ApplicationCard({
               {application.availableActions.map(action => (
                 <Button
                   key={action.targetStatus}
-                  variant={action.variant === 'destructive' ? 'danger' : 'outline'}
+                  variant="outline"
                   size="sm"
                   onClick={() => handleStatusChange(action.targetStatus)}
                   disabled={isUpdating}
+                  className={action.variant === 'destructive' ? 'border-red-300 text-red-600 hover:bg-red-50' : ''}
                 >
                   {action.label}
                 </Button>

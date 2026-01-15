@@ -8,13 +8,24 @@ import { SeniorityLevel } from '@/core/job/domain/value-objects/Seniority';
 import { ContractTypeValue } from '@/core/job/domain/value-objects/ContractType';
 import { WorkModelType } from '@/core/job/domain/value-objects/WorkModel';
 
-interface JobFormProps {
+interface JobFormBaseProps {
   companyId: string;
-  initialData?: Partial<CreateJobDTO> & { id?: string };
-  onSubmit: (data: CreateJobDTO | UpdateJobDTO) => Promise<void>;
   isLoading?: boolean;
-  mode: 'create' | 'edit';
 }
+
+interface JobFormCreateProps extends JobFormBaseProps {
+  mode: 'create';
+  initialData?: Partial<CreateJobDTO>;
+  onSubmit: (data: CreateJobDTO) => Promise<void>;
+}
+
+interface JobFormEditProps extends JobFormBaseProps {
+  mode: 'edit';
+  initialData: Partial<CreateJobDTO> & { id: string };
+  onSubmit: (data: UpdateJobDTO) => Promise<void>;
+}
+
+type JobFormProps = JobFormCreateProps | JobFormEditProps;
 
 const SENIORITY_OPTIONS: { value: SeniorityLevel; label: string }[] = [
   { value: 'junior', label: 'Junior' },
@@ -81,7 +92,7 @@ export function JobForm({ companyId, initialData, onSubmit, isLoading, mode }: J
     }
 
     try {
-      const data: CreateJobDTO = {
+      const baseData = {
         companyId,
         title: formData.title.trim(),
         description: formData.description.trim(),
@@ -99,10 +110,12 @@ export function JobForm({ companyId, initialData, onSubmit, isLoading, mode }: J
         expiresAt: formData.expiresAt || null,
       };
 
-      if (mode === 'edit' && initialData?.id) {
-        await onSubmit({ ...data, id: initialData.id } as UpdateJobDTO);
+      if (mode === 'edit') {
+        const editProps = { mode, initialData, onSubmit } as JobFormEditProps;
+        await editProps.onSubmit({ ...baseData, id: editProps.initialData.id });
       } else {
-        await onSubmit(data);
+        const createProps = { mode, onSubmit } as JobFormCreateProps;
+        await createProps.onSubmit(baseData);
       }
 
       router.push('/recruiter/jobs');
@@ -125,7 +138,7 @@ export function JobForm({ companyId, initialData, onSubmit, isLoading, mode }: J
       <div className="space-y-6">
         <Card>
           <h2 className="text-lg font-semibold text-foreground mb-4">Basic Information</h2>
-          
+
           <div className="space-y-4">
             <div>
               <label className="block text-sm font-medium text-foreground mb-1">
@@ -170,7 +183,7 @@ export function JobForm({ companyId, initialData, onSubmit, isLoading, mode }: J
 
         <Card>
           <h2 className="text-lg font-semibold text-foreground mb-4">Location</h2>
-          
+
           <div className="space-y-4">
             <div className="flex items-center gap-2">
               <input
@@ -195,11 +208,10 @@ export function JobForm({ companyId, initialData, onSubmit, isLoading, mode }: J
                     key={option.value}
                     type="button"
                     onClick={() => setFormData(prev => ({ ...prev, workModel: option.value }))}
-                    className={`px-3 py-1.5 text-sm rounded-lg border transition-colors ${
-                      formData.workModel === option.value
-                        ? 'bg-secondary text-white border-secondary'
-                        : 'bg-background border-border text-foreground hover:border-secondary'
-                    }`}
+                    className={`px-3 py-1.5 text-sm rounded-lg border transition-colors ${formData.workModel === option.value
+                      ? 'bg-secondary text-white border-secondary'
+                      : 'bg-background border-border text-foreground hover:border-secondary'
+                      }`}
                   >
                     {option.label}
                   </button>
@@ -244,7 +256,7 @@ export function JobForm({ companyId, initialData, onSubmit, isLoading, mode }: J
 
         <Card>
           <h2 className="text-lg font-semibold text-foreground mb-4">Job Details</h2>
-          
+
           <div className="space-y-4">
             <div>
               <label className="block text-sm font-medium text-foreground mb-1">
@@ -256,11 +268,10 @@ export function JobForm({ companyId, initialData, onSubmit, isLoading, mode }: J
                     key={option.value}
                     type="button"
                     onClick={() => handleContractTypeToggle(option.value)}
-                    className={`px-3 py-1.5 text-sm rounded-lg border transition-colors ${
-                      formData.contractTypes.includes(option.value)
-                        ? 'bg-secondary text-white border-secondary'
-                        : 'bg-background border-border text-foreground hover:border-secondary'
-                    }`}
+                    className={`px-3 py-1.5 text-sm rounded-lg border transition-colors ${formData.contractTypes.includes(option.value)
+                      ? 'bg-secondary text-white border-secondary'
+                      : 'bg-background border-border text-foreground hover:border-secondary'
+                      }`}
                   >
                     {option.label}
                   </button>
@@ -277,15 +288,14 @@ export function JobForm({ companyId, initialData, onSubmit, isLoading, mode }: J
                   <button
                     key={option.value}
                     type="button"
-                    onClick={() => setFormData(prev => ({ 
-                      ...prev, 
-                      seniority: prev.seniority === option.value ? null : option.value 
+                    onClick={() => setFormData(prev => ({
+                      ...prev,
+                      seniority: prev.seniority === option.value ? null : option.value
                     }))}
-                    className={`px-3 py-1.5 text-sm rounded-lg border transition-colors ${
-                      formData.seniority === option.value
-                        ? 'bg-secondary text-white border-secondary'
-                        : 'bg-background border-border text-foreground hover:border-secondary'
-                    }`}
+                    className={`px-3 py-1.5 text-sm rounded-lg border transition-colors ${formData.seniority === option.value
+                      ? 'bg-secondary text-white border-secondary'
+                      : 'bg-background border-border text-foreground hover:border-secondary'
+                      }`}
                   >
                     {option.label}
                   </button>
@@ -297,7 +307,7 @@ export function JobForm({ companyId, initialData, onSubmit, isLoading, mode }: J
 
         <Card>
           <h2 className="text-lg font-semibold text-foreground mb-4">Compensation</h2>
-          
+
           <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
             <div>
               <label className="block text-sm font-medium text-foreground mb-1">
@@ -306,9 +316,9 @@ export function JobForm({ companyId, initialData, onSubmit, isLoading, mode }: J
               <input
                 type="number"
                 value={formData.salaryMin ?? ''}
-                onChange={e => setFormData(prev => ({ 
-                  ...prev, 
-                  salaryMin: e.target.value ? Number(e.target.value) : null 
+                onChange={e => setFormData(prev => ({
+                  ...prev,
+                  salaryMin: e.target.value ? Number(e.target.value) : null
                 }))}
                 className="w-full px-3 py-2 bg-background border border-border rounded-lg focus:outline-none focus:ring-2 focus:ring-secondary focus:border-transparent"
                 placeholder="50000"
@@ -321,9 +331,9 @@ export function JobForm({ companyId, initialData, onSubmit, isLoading, mode }: J
               <input
                 type="number"
                 value={formData.salaryMax ?? ''}
-                onChange={e => setFormData(prev => ({ 
-                  ...prev, 
-                  salaryMax: e.target.value ? Number(e.target.value) : null 
+                onChange={e => setFormData(prev => ({
+                  ...prev,
+                  salaryMax: e.target.value ? Number(e.target.value) : null
                 }))}
                 className="w-full px-3 py-2 bg-background border border-border rounded-lg focus:outline-none focus:ring-2 focus:ring-secondary focus:border-transparent"
                 placeholder="80000"
@@ -335,9 +345,9 @@ export function JobForm({ companyId, initialData, onSubmit, isLoading, mode }: J
               </label>
               <select
                 value={formData.salaryCurrency}
-                onChange={e => setFormData(prev => ({ 
-                  ...prev, 
-                  salaryCurrency: e.target.value as typeof formData.salaryCurrency 
+                onChange={e => setFormData(prev => ({
+                  ...prev,
+                  salaryCurrency: e.target.value as typeof formData.salaryCurrency
                 }))}
                 className="w-full px-3 py-2 bg-background border border-border rounded-lg focus:outline-none focus:ring-2 focus:ring-secondary focus:border-transparent"
               >
@@ -351,7 +361,7 @@ export function JobForm({ companyId, initialData, onSubmit, isLoading, mode }: J
 
         <Card>
           <h2 className="text-lg font-semibold text-foreground mb-4">Expiration</h2>
-          
+
           <div>
             <label className="block text-sm font-medium text-foreground mb-1">
               Expires At (optional)
@@ -359,9 +369,9 @@ export function JobForm({ companyId, initialData, onSubmit, isLoading, mode }: J
             <input
               type="date"
               value={formData.expiresAt ? formData.expiresAt.split('T')[0] : ''}
-              onChange={e => setFormData(prev => ({ 
-                ...prev, 
-                expiresAt: e.target.value ? `${e.target.value}T23:59:59Z` : '' 
+              onChange={e => setFormData(prev => ({
+                ...prev,
+                expiresAt: e.target.value ? `${e.target.value}T23:59:59Z` : ''
               }))}
               className="w-full px-3 py-2 bg-background border border-border rounded-lg focus:outline-none focus:ring-2 focus:ring-secondary focus:border-transparent"
             />

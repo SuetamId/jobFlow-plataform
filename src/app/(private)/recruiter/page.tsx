@@ -5,7 +5,7 @@ import { useRouter } from 'next/navigation';
 import Link from 'next/link';
 import { Card, Button } from '@/presentation/components/ui';
 import { useAuth } from '@/presentation/auth';
-import { useRecruiter, useCompanyJobs, RecruiterStats, JobCard } from '@/presentation/recruiter';
+import { useRecruiter, useCompanyJobs, RecruiterStats, RecruiterJobCard } from '@/presentation/recruiter';
 
 export default function RecruiterDashboardPage() {
   const { user, isLoading: authLoading } = useAuth();
@@ -89,7 +89,7 @@ export default function RecruiterDashboardPage() {
                   ) : (
                     <div className="space-y-4">
                       {jobs.slice(0, 3).map(job => (
-                        <JobCard key={job.id} job={job} />
+                        <RecruiterJobCard key={job.id} job={job} />
                       ))}
                     </div>
                   )}

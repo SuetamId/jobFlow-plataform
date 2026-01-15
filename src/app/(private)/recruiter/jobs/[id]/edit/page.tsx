@@ -16,7 +16,7 @@ export default function EditJobPage() {
   const router = useRouter();
   const params = useParams();
   const jobId = params.id as string;
-  
+
   const { recruiter, isLoading: recruiterLoading } = useRecruiter();
   const { updateJob, isLoading: mutationLoading } = useJobMutation(recruiter?.id ?? null);
   const [jobData, setJobData] = useState<Partial<CreateJobDTO> & { id: string } | null>(null);
@@ -39,10 +39,10 @@ export default function EditJobPage() {
 
   const loadJob = useCallback(async () => {
     if (!recruiter) return;
-    
+
     setJobLoading(true);
     setError(null);
-    
+
     try {
       const job = await getJobDetailUseCase(
         {
@@ -55,7 +55,7 @@ export default function EditJobPage() {
           jobId,
         }
       );
-      
+
       setJobData({
         id: job.id,
         title: job.title,
@@ -74,8 +74,8 @@ export default function EditJobPage() {
     }
   }, [recruiter, loadJob]);
 
-  const handleSubmit = async (data: CreateJobDTO | UpdateJobDTO) => {
-    await updateJob(data as UpdateJobDTO);
+  const handleSubmit = async (data: UpdateJobDTO) => {
+    await updateJob(data);
   };
 
   const isLoading = recruiterLoading || jobLoading;

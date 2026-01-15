@@ -1,11 +1,12 @@
 'use client';
 
+import { Suspense } from 'react';
 import { useSearchParams } from 'next/navigation';
 import { useEffect } from 'react';
 import { Card } from '@/presentation/components/ui';
 import { JobList, JobSearch, JobFilters, Pagination, useJobs, useJobFilters } from '@/presentation/job';
 
-export default function JobsPage() {
+function JobsContent() {
   const searchParams = useSearchParams();
   const initialSearch = searchParams.get('search') || '';
   const initialLocation = searchParams.get('location') || '';
@@ -115,5 +116,39 @@ export default function JobsPage() {
         </div>
       </div>
     </div>
+  );
+}
+
+function JobsPageLoading() {
+  return (
+    <div className="py-8 md:py-10">
+      <div className="container-app">
+        <div className="mb-8">
+          <div className="h-8 w-48 bg-background-secondary rounded animate-pulse" />
+          <div className="h-4 w-32 bg-background-secondary rounded animate-pulse mt-2" />
+        </div>
+        <div className="mb-8">
+          <div className="h-14 bg-background-secondary rounded-lg animate-pulse" />
+        </div>
+        <div className="grid grid-cols-1 lg:grid-cols-4 gap-6 lg:gap-8">
+          <div className="lg:col-span-1">
+            <div className="h-64 bg-background-secondary rounded-lg animate-pulse" />
+          </div>
+          <div className="lg:col-span-3 space-y-4">
+            {[...Array(3)].map((_, i) => (
+              <div key={i} className="h-32 bg-background-secondary rounded-lg animate-pulse" />
+            ))}
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+}
+
+export default function JobsPage() {
+  return (
+    <Suspense fallback={<JobsPageLoading />}>
+      <JobsContent />
+    </Suspense>
   );
 }
