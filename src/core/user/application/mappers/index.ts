@@ -1,0 +1,1 @@
+export { mapUserProfileToDTO } from './UserProfileMapper';
